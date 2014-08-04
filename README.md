@@ -22,7 +22,7 @@ timer.on('reset',function(s) { //called at end of each period defined by maxSamp
   console.log("Benchme stats: %j",s);
 });
 
-//some other place in your code that manages these
+//some other place in your code that manages these globally
 var benchme = require('benchme');
 benchme.on('reset', function(name,s) {
   console.log("The %s timer has a new sample period: %j",name,s);
