@@ -1,6 +1,6 @@
 {
   "name": "benchme",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A fast utility to generate timing stats for your node program.",
   "main": "index.js",
   "repository": {
