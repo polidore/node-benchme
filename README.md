@@ -18,9 +18,9 @@ var benchme = require('benchme');
 //some local scope
 
 var timer = benchme('myScope',{maxSamples:10000,precision:'ms'});
-timer.sample();
+timer.start();
 //do stuff
-var s = timer.sample(); //optionally find out when about to reset at calling time
+var s = timer.end(); //optionally find out when about to reset at calling time
 if(s) {
   console.log("Benchme stats: %j",s);
 }
@@ -29,7 +29,7 @@ if(s) {
 
 //some other place in your code that manages these
 var timer = benchme('myScope');
-timer.on('reset',function(s) {
+timer.on('reset',function(s) { //find out when the timer with name 'myScope' is resetting and log the prior period
   console.log("Benchme stats: %j",s);
 });
 ```

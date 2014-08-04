@@ -1,3 +1,6 @@
+var events = require('events');
+var util = require('util');
+
 var timers = {};
 module.exports = function(name,options) {
   if(!name) {
@@ -9,13 +12,14 @@ module.exports = function(name,options) {
   }
 
   if(!timers[name]) {
-    timers[name] = new Timings(options);
+    timers[name] = new BenchMe(options);
   }
 
   return timers[name];
 }
 
-function Timings(options) {
+function BenchMe(options) {
+  events.EventEmitter.call(this);
   if(!options) options = {};
 
   if(isNaN(options.maxSamples)) {
@@ -39,9 +43,11 @@ function Timings(options) {
   this.starting = null;
   this.maxSamples = options.maxSamples;
   this._resetStats();
-}
+};
 
-Timings.prototype._resetStats = function() {
+util.inherits(BenchMe,events.EventEmitter);
+
+BenchMe.prototype._resetStats = function() {
   this.mean = 0;
   this.count = 0;
   this.ssd = 0; //sum of squared differences
@@ -50,7 +56,7 @@ Timings.prototype._resetStats = function() {
   this.starting = null; //just in case
 }
 
-Timings.prototype._recordSample = function(x) {
+BenchMe.prototype._recordSample = function(x) {
   this.min = Math.min(this.min,x);
   this.max = Math.max(this.max,x);
   this.count++;
@@ -61,32 +67,35 @@ Timings.prototype._recordSample = function(x) {
   this.ssd += delta*(x - this.mean);
 }
 
-Timings.prototype.sample = function() {
-  var r = null;
-  if(!this.starting) {
-    this.starting = process.hrtime();
-  }
-  else {
-    var diff = process.hrtime(this.starting);
-    var x = diff[0] * 1e9 + diff[1]; //statistical x
-    this.starting = null;
+BenchMe.prototype.start = function() {
+  if(this.starting) throw "Already timing";
+  this.starting = process.hrtime();
+}
 
-    this._recordSample(x);
+BenchMe.prototype.end = function() {
+  if(!this.starting) throw "Not timing";
 
-    if(this.count >= this.maxSamples) {
-      r = this.summarize();
-      this._resetStats();
-    }
+  var r;
+  var diff = process.hrtime(this.starting);
+  var x = diff[0] * 1e9 + diff[1]; //statistical x
+  this.starting = null;
+
+  this._recordSample(x);
+
+  if(this.count >= this.maxSamples) {
+    r = this.summarize();
+    this._resetStats();
+    this.emit('reset',r);
   }
   return r;
-};
+}
 
-Timings.prototype._getSD = function() {
+BenchMe.prototype._getSD = function() {
   if(this.count < 2) return 0;
   return Math.sqrt(this.ssd/this.count);
 }
 
-Timings.prototype.summarize = function() {
+BenchMe.prototype.summarize = function() {
   var precision = this.precision;
   var f = function(n) { return format(n,precision); };
   return {mean:f(this.mean),max:f(this.max),min:f(this.min),stdDev:f(this._getSD())};

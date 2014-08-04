@@ -29,18 +29,45 @@ describe("Statistical Tests", function() {
 
 describe("Workflow tests", function() {
   var timer = benchme('workflow',{maxSamples:10});
+
+  beforeEach(function() {
+    timer._resetStats();
+  });
+
   it("Should reset after 10", function() {
-    var r;
+    var s;
     for(var i=0;i<10;i++) {
-      timer.sample();
+      timer.start();
       for(var j=0;j<10000;j++) {
       }
-      r = timer.sample();
+      s = timer.end();
       if(i+1 < 10) {
-        expect(r).not.toBeTruthy();
+        expect(s).not.toBeTruthy();
       }
       else {
-        expect(r).toBeTruthy();
+        expect(s).toBeTruthy();
+      }
+    }
+  });
+
+  it("Should callback when full", function(done) {
+    var s;
+
+    timer.on('reset',function(s) {
+      expect(s).toBeTruthy();
+      done();
+    });
+
+    for(var i=0;i<10;i++) {
+      timer.start();
+      for(var j=0;j<10000;j++) {
+      }
+      s = timer.end();
+      if(i+1 < 10) {
+        expect(s).not.toBeTruthy();
+      }
+      else {
+        expect(s).toBeTruthy();
       }
     }
   });
