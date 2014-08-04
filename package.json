@@ -1,0 +1,24 @@
+{
+  "name": "benchme",
+  "version": "0.0.0",
+  "description": "A fast utility to generate timing stats for your node program.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/polidore/node-benchme.git"
+  },
+  "keywords": [
+    "timer",
+    "benchmarks",
+    "performance"
+  ],
+  "author": "Ben Polidore",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/polidore/node-benchme/issues"
+  },
+  "homepage": "https://github.com/polidore/node-benchme"
+}
