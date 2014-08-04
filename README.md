@@ -13,24 +13,19 @@ npm install --save benchme
 ```javascript
 var benchme = require('benchme');
 
-//...
-
-//some local scope
-
-var timer = benchme('myScope',{maxSamples:10000,precision:'ms'});
+var timer = benchme.getTimer('myScope',{maxSamples:10000,precision:'ms'});
 timer.start();
 //do stuff
-var s = timer.end(); //optionally find out when about to reset at calling time
-if(s) {
-  console.log("Benchme stats: %j",s);
-}
+var x = timer.end(); //returns the time elapsed for this sample
 
-//...
+timer.on('reset',function(s) { //called at end of each period defined by maxSamples
+  console.log("Benchme stats: %j",s);
+});
 
 //some other place in your code that manages these
-var timer = benchme('myScope');
-timer.on('reset',function(s) { //find out when the timer with name 'myScope' is resetting and log the prior period
-  console.log("Benchme stats: %j",s);
+var benchme = require('benchme');
+benchme.on('reset', function(name,s) {
+  console.log("The %s timer has a new sample period: %j",name,s);
 });
 ```
 

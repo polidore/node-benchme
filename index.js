@@ -116,7 +116,5 @@ var format = function(n,p) {
   return Math.floor(n/p);
 };
 
-var benchme = new BenchMe();
-module.exports = function(name,options) {
-  return benchme.getTimer.call(benchme,name,options);
-};
+var benchme = new BenchMe(); //singleton
+module.exports = benchme;

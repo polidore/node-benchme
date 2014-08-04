@@ -1,8 +1,8 @@
-var benchme = require('../');
+var benchme = require('../')
 
 describe("Statistical Tests", function() {
   var data = [50,25,30,25,5,10,100,20,30,50,19,17,51,42];
-  var timer = benchme();
+  var timer = benchme.getTimer();
   beforeEach(function() {
     timer._resetStats();
     data.forEach(function(d) {
@@ -28,7 +28,7 @@ describe("Statistical Tests", function() {
 });
 
 describe("Workflow tests", function() {
-  var timer = benchme('workflow',{maxSamples:10});
+  var timer = benchme.getTimer('workflow',{maxSamples:10});
 
   beforeEach(function() {
     timer._resetStats();
@@ -36,12 +36,20 @@ describe("Workflow tests", function() {
 
   it("Should callback when full", function(done) {
     var s;
+    var c = 0;
+
+    benchme.on('reset', function(name,s) {
+      expect(s).toBeTruthy();
+      expect(s.min).toBeLessThan(Number.MAX_VALUE);
+      expect(s.max).toBeGreaterThan(0);
+      if(++c == 2) done();
+    });
 
     timer.on('reset',function(s) {
       expect(s).toBeTruthy();
       expect(s.min).toBeLessThan(Number.MAX_VALUE);
       expect(s.max).toBeGreaterThan(0);
-      done();
+      if(++c == 2) done();
     });
 
     for(var i=0;i<10;i++) {
