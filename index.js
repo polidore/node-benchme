@@ -1,8 +1,14 @@
 var events = require('events');
 var util = require('util');
 
-var timers = {};
-module.exports = function(name,options) {
+function BenchMe() {
+  events.EventEmitter.call(this);
+  this.timers = {};
+};
+
+util.inherits(BenchMe,events.EventEmitter);
+
+BenchMe.prototype.getTimer = function(name,options) {
   if(!name) {
     name = '__global';
   }
@@ -11,14 +17,19 @@ module.exports = function(name,options) {
     name = '__global';
   }
 
-  if(!timers[name]) {
-    timers[name] = new BenchMe(options);
+  if(!this.timers[name]) {
+    this.timers[name] = new Timer(options);
   }
 
-  return timers[name];
-}
+  var self = this;
+  this.timers[name].on('reset',function(s) {
+    self.emit('reset',name,s);
+  });
 
-function BenchMe(options) {
+  return this.timers[name];
+};
+
+function Timer(options) {
   events.EventEmitter.call(this);
   if(!options) options = {};
 
@@ -45,9 +56,9 @@ function BenchMe(options) {
   this._resetStats();
 };
 
-util.inherits(BenchMe,events.EventEmitter);
+util.inherits(Timer,events.EventEmitter);
 
-BenchMe.prototype._resetStats = function() {
+Timer.prototype._resetStats = function() {
   this.mean = 0;
   this.count = 0;
   this.ssd = 0; //sum of squared differences
@@ -56,7 +67,7 @@ BenchMe.prototype._resetStats = function() {
   this.starting = null; //just in case
 }
 
-BenchMe.prototype._recordSample = function(x) {
+Timer.prototype._recordSample = function(x) {
   this.min = Math.min(this.min,x);
   this.max = Math.max(this.max,x);
   this.count++;
@@ -67,12 +78,12 @@ BenchMe.prototype._recordSample = function(x) {
   this.ssd += delta*(x - this.mean);
 }
 
-BenchMe.prototype.start = function() {
+Timer.prototype.start = function() {
   if(this.starting) throw "Already timing";
   this.starting = process.hrtime();
 }
 
-BenchMe.prototype.end = function() {
+Timer.prototype.end = function() {
   if(!this.starting) throw "Not timing";
 
   var r;
@@ -83,19 +94,19 @@ BenchMe.prototype.end = function() {
   this._recordSample(x);
 
   if(this.count >= this.maxSamples) {
-    r = this.summarize();
+    var summary = this.summarize();
     this._resetStats();
-    this.emit('reset',r);
+    this.emit('reset',summary);
   }
-  return r;
+  return x/this.precision;
 }
 
-BenchMe.prototype._getSD = function() {
+Timer.prototype._getSD = function() {
   if(this.count < 2) return 0;
   return Math.sqrt(this.ssd/this.count);
 }
 
-BenchMe.prototype.summarize = function() {
+Timer.prototype.summarize = function() {
   var precision = this.precision;
   var f = function(n) { return format(n,precision); };
   return {mean:f(this.mean),max:f(this.max),min:f(this.min),stdDev:f(this._getSD())};
@@ -103,4 +114,9 @@ BenchMe.prototype.summarize = function() {
 
 var format = function(n,p) {
   return Math.floor(n/p);
+};
+
+var benchme = new BenchMe();
+module.exports = function(name,options) {
+  return benchme.getTimer.call(benchme,name,options);
 };

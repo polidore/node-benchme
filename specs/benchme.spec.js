@@ -34,41 +34,24 @@ describe("Workflow tests", function() {
     timer._resetStats();
   });
 
-  it("Should reset after 10", function() {
-    var s;
-    for(var i=0;i<10;i++) {
-      timer.start();
-      for(var j=0;j<10000;j++) {
-      }
-      s = timer.end();
-      if(i+1 < 10) {
-        expect(s).not.toBeTruthy();
-      }
-      else {
-        expect(s).toBeTruthy();
-      }
-    }
-  });
-
   it("Should callback when full", function(done) {
     var s;
 
     timer.on('reset',function(s) {
       expect(s).toBeTruthy();
+      expect(s.min).toBeLessThan(Number.MAX_VALUE);
+      expect(s.max).toBeGreaterThan(0);
       done();
     });
 
     for(var i=0;i<10;i++) {
       timer.start();
+      var a = [];
       for(var j=0;j<10000;j++) {
+        a.push(j)
       }
       s = timer.end();
-      if(i+1 < 10) {
-        expect(s).not.toBeTruthy();
-      }
-      else {
-        expect(s).toBeTruthy();
-      }
+      expect(isNaN(s)).not.toBeTruthy();
     }
   });
 
