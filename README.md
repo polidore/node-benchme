@@ -13,7 +13,7 @@ npm install --save benchme
 ```javascript
 var benchme = require('benchme');
 
-var timer = benchme.getTimer('myScope',{maxSamples:10000,precision:'ms'});
+var timer = benchme.getTimer('myScope',{maxSamples:10000,precision:'us'});
 timer.start();
 //do stuff
 var x = timer.end(); //returns the time elapsed for this sample

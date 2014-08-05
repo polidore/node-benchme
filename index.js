@@ -12,7 +12,7 @@ BenchMe.prototype.getTimer = function(name,options) {
   if(!name) {
     name = '__global';
   }
-  else if(typeof name != 'string') { //name isn't a string
+  else if(typeof name != 'string') {
     options = name;
     name = '__global';
   }
@@ -37,15 +37,18 @@ function Timer(options) {
     options.maxSamples = 10000;
   }
   if(!options.precision) {
-    options.precision = 'ms';
+    options.precision = 'us';
   }
 
   switch(options.precision) {
-    case 'ms':
+    case 'us':
       this.precision = 1000;
       break;
     case 'ns':
       this.precision = 1;
+      break;
+    case 'ms':
+      this.precision = 1000*1000;
       break;
     default:
       throw "Invalid precision";
