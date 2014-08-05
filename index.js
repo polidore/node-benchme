@@ -19,12 +19,11 @@ BenchMe.prototype.getTimer = function(name,options) {
 
   if(!this.timers[name]) {
     this.timers[name] = new Timer(options);
+    var self = this;
+    this.timers[name].on('reset',function(s) {
+      self.emit('reset',name,s);
+    });
   }
-
-  var self = this;
-  this.timers[name].on('reset',function(s) {
-    self.emit('reset',name,s);
-  });
 
   return this.timers[name];
 };
